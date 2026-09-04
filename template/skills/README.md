@@ -51,7 +51,8 @@ description: 一句话说明何时该用（触发条件尽量具体、可判定�
 
 ## 安装 / 发现
 
-- bootstrap 时按需复制到目标工具目录（详见 `docs/BOOTSTRAP.md` §技能）；仓库内 `skills/` 始终是源，项目里只放副本/引用。
+- **一键安装**：`harness-tool skills install ./skills/<name> [--agents claude,cursor]`——把技能装到对应工具的技能目录（默认 `.claude/skills`、`.cursor/skills`；已存在跳过，幂等）。详见 [harness-tool](https://github.com/auki-zy/harness-tool) 的 `skills install`。
+- 手工方式：bootstrap 时按需复制到目标工具目录（详见 `docs/BOOTSTRAP.md` §技能）；仓库内 `skills/` 始终是源，项目里只放副本/引用。
 - 发现路径：本 README 列当前技能清单；agent 开工时由 `AGENTS.md` 路由或工具视图引用。
 
 ## 当前技能清单
