@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src --max-warnings 0",
     "test": "vitest run --pool=threads src",
+    "sync:template": "node scripts/sync-template.mjs",
     "start": "node dist/cli.js"
   },
   "engines": {

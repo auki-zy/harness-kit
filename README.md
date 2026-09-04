@@ -64,6 +64,24 @@ my-app/
 
 本项目自身也用它自己的方法论治理（dogfood）：AGENTS 路由、BOOTSTRAP 清单、active plan 驱动。
 
+## 🔄 模板自动同步与发布（GitHub Actions）
+
+内置 `template/` 是 [`harness-template`](https://github.com/auki-zy/harness-template) 的**版本化快照**。为让模板更新尽快到达用户，本仓库配了自动流水线：
+
+- **触发**：每天 `02:00 UTC` 定时检查；也可在仓库 **Actions → Run workflow** 手动触发；
+- **逻辑**：对比上游 `harness-template@main` 最新 commit 与 `template/.template-version`；有更新则同步快照 → `npm version patch` → 过 `typecheck / lint / test / build` → 发布 npm → 打 `vX.Y.Z` tag；
+- **前置**：仓库需配置 npm 发布密钥（Actions secret `NPM_TOKEN`：npmjs 上 auki-zy 的 granular token，勾选 *Read and write* 与 *Bypass 2FA*）；
+- **用户侧**：新版本发布后，`npx harness-tool` / `npm i -g harness-tool@latest` 即拿到含最新模板的快照；**已初始化项目不会被自动覆盖**（项目是独立副本，需升级时走模板同步流程）；
+- **手动**：本地 `npm run sync:template` 可随时同步（写入 `template/.template-version`）。
+
+```text
+harness-template 更新
+   ↓（Actions 每日/手动检查）
+harness-tool 同步快照 + bump + 发布 npm vX.Y.Z
+   ↓（用户 npx / npm i -g @latest）
+新项目 init 时拿到最新模板
+```
+
 ## 🧑‍💻 开发
 
 ```bash

@@ -1,0 +1,83 @@
+name: template-sync-release
+
+# harness-template 有更新时，自动把最新模板同步进本包并发布新版本。
+# 触发：每日定时 + 手动运行（Actions → Run workflow）。
+on:
+  schedule:
+    - cron: '0 2 * * *' # 每天 02:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: template-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Compare & sync template snapshot
+        id: sync
+        run: npm run sync:template
+        env:
+          HK_UPSTREAM_REPO: auki-zy/harness-template
+
+      # sync-template 输出为 0 且无文件变化时 = 无更新 → 直接结束
+      - name: Detect changes
+        id: changes
+        run: |
+          if [ -z "$(git status --porcelain template package.json package-lock.json)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: No update
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "模板无更新，跳过发布"
+
+      - name: Version bump (patch)
+        if: steps.changes.outputs.changed == 'true'
+        run: npm version patch --no-git-tag-version
+
+      - name: Quality gates
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build
+
+      - name: Publish to npm
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
+          npm publish --registry https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit & tag
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "auki-zy"
+          git config user.email "auki-zy@users.noreply.github.com"
+          VERSION=$(node -p "require('./package.json').version")
+          git add template package.json package-lock.json
+          git commit -m "chore: 同步 harness-template 模板快照并发布 v${VERSION} [skip ci]"
+          git tag "v${VERSION}"
+          git push origin main
+          git push origin "v${VERSION}"
