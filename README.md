@@ -1,25 +1,93 @@
 # harness-tool
 
-给新项目一键带上 **harness 工程层**（AGENTS/docs 治理/工程规范/skills 源目录）的命令行工具。
+**把 agent-first 工程层一键装进新项目的 CLI** —— `init` 在任意目录铺好 AGENTS / 治理文档 / 工程规范 / 技能源，`doctor` 负责确认它真的就绪。
 
-- 本项目是 **dogfood 实战 #1**：由 [`harness-template`](https://github.com/auki-zy/harness-template) v1 初始化，本仓库自身就在用它自己的治理流程（AGENTS/BOOTSTRAP/计划）。
-- 发布名定为 **harness-tool**（npm 裸名 `harness-init` 已被他人占用——见 [`docs/references/competitor-notes.md`](docs/references/competitor-notes.md)）。
-- 状态：v1 已实现 `init`（合并不覆盖）与 `doctor`（就绪自检），本地端到端验证通过；见当前 active plan。
+> `v0.1.0 · Node ≥ 20 · MIT · 零运行时依赖 · 工具中立（DSH / Claude Code / Cursor / Codex 通用）`
 
-## 用法
+---
+
+## ✨ 特性
+
+| | 特性 | 说明 |
+|---|---|---|
+| ⚡ | **一条命令铺层** | `harness-tool init my-app`：模板快照（32 个文件）合并进目标目录 |
+| 🛡 | **绝不覆盖** | 只新增；已存在文件一律跳过并列出冲突，你的文件永远安全 |
+| 🤖 | **AI 交接** | 装完直接输出一段可复制的提示语，交给编码 agent 照仓库内文档继续落地 |
+| 🩺 | **就绪自检** | `harness-tool doctor`：关键文件 / 占位符 / 机械配置 / active plan / git 五维检查 |
+| 🔧 | **零运行时依赖** | 纯 Node 实现；TypeScript + Vitest + ESLint 仅用于开发与测试 |
+| 🔄 | **模板源可同步** | 内置 `template/` 快照源自 [`harness-template`](https://github.com/auki-zy/harness-template)，发版前随源更新 |
+
+## 🚀 快速开始
 
 ```bash
-harness-tool init my-app      # 把模板快照合并进 my-app（只新增不覆盖，冲突列出）
-harness-tool init . --git     # 合并 + git init
-harness-tool doctor           # 自检当前(harness)目录：关键文件/占位符/机械配置/plan/git
+npx harness-tool init my-app     # ① 初始化（也可 init . --git 顺带 git init）
+cd my-app
+harness-tool doctor              # ② 自检（会提示还缺哪些文档/配置）
 ```
 
-## 与同名项目的区别（一句话）
+然后把 `init` 输出里那段话发给你的编码 agent（DSH / Claude Code / Cursor / Codex），
+它会按仓库内 `AGENTS.md` 与 `docs/BOOTSTRAP.md` 完成落地——你不需要手把手教它。
 
-npm 上已有 `harness-init`（Claude Code 权限配置初始化器）与 `harness-cli`（多项目任务编排器）；**本项目的定位是"工程化治理模板分发器"**——把规则/规范/流程文档与机械配置基线带进新项目，不绑定某家工具、不做任务编排。调研与借鉴点见 [`docs/references/competitor-notes.md`](docs/references/competitor-notes.md)。
+想叠前端栈？先初始化，再在项目里执行 `npm create vite@latest . -- --template react-ts`。
 
-## Agent 入口（本仓库治理）
+## 📖 命令参考
+
+| 命令 | 作用 | 退出码 |
+|------|------|--------|
+| `harness-tool init [dir] [--git]` | 把模板快照合并进 `dir`（默认 `.`）；只新增不覆盖，冲突列出；`--git` 额外执行 `git init -b main` | 0=成功，1=错误 |
+| `harness-tool doctor [dir]` | 自检目录是否具备可开工的 harness 工程层 | 0=可开工（无关键缺失），1=存在关键缺失 |
+
+`doctor` 检查维度：关键文件（critical）· 占位符是否已填 · 五件套 scripts / tsconfig · active plan · git。
+
+## 🧩 它往项目里放了什么
+
+```text
+my-app/
+├── AGENTS.md          # Agent 开工流程 + 路由地图
+├── ARCHITECTURE.md    # 系统形态 / 领域地图 / 分层规则
+├── docs/              # 治理与工程规范文档族（PLANS·MEMORY·FSD·TESTING·CI·BOOTSTRAP…）
+└── skills/            # 技能源目录与入库标准
+```
+
+装的是"规则与治理骨架"，不是代码脚手架——`package.json`、`src/` 等由你的技术栈脚手架负责，两者不冲突、互不覆盖。
+
+## 🛠 工作原理
+
+- **模板快照**：`template/` 是 [`harness-template`](https://github.com/auki-zy/harness-template) 的版本化快照；`init` 递归合并、逐文件判断"已存在则跳过"。
+- **验证闭环**：`doctor` 把模板的纪律（文档填了没、机械配置装没装、计划建没建）转成可执行检查——AI 干完活能自证"就绪"。
+
+## 🔗 相关项目
+
+| 仓库 | 关系 |
+|------|------|
+| [`harness-template`](https://github.com/auki-zy/harness-template)（npm 模板源） | 本 CLI 内置快照的上游；模板与工具"同源、各自迭代" |
+
+本项目自身也用它自己的方法论治理（dogfood）：AGENTS 路由、BOOTSTRAP 清单、active plan 驱动。
+
+## 🧑‍💻 开发
+
+```bash
+git clone https://github.com/auki-zy/harness-tool.git
+cd harness-tool
+npm install            # 开发依赖（TypeScript/Vitest/ESLint）
+npm run build          # 产出 dist/
+npm run lint && npm test   # 质量门禁
+npm link               # 本地体验：任意目录执行 harness-tool
+```
+
+| script | 作用 |
+|--------|------|
+| `dev` / `start` | 运行 CLI（需先 build） |
+| `build` / `typecheck` | tsc 产出 / 类型检查 |
+| `lint` / `test` | ESLint / Vitest（threads 池） |
+
+## 🗺 仓库治理入口
 
 - [`AGENTS.md`](AGENTS.md)：开工流程 + 路由地图（canonical 入口）
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)：系统形态与分层
-- 落地清单：[`docs/BOOTSTRAP.md`](docs/BOOTSTRAP.md)；当前计划：[`docs/exec-plans/active/`](docs/exec-plans/active/)
+- [`docs/BOOTSTRAP.md`](docs/BOOTSTRAP.md)：开新项目落地清单
+- 当前计划：[`docs/exec-plans/active/`](docs/exec-plans/active/)
+
+---
+
+> 反馈与想法：欢迎在 [issues](https://github.com/auki-zy/harness-tool/issues) 提出。
