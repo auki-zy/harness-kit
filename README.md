@@ -12,6 +12,7 @@
 |---|---|---|
 | ⚡ | **一条命令铺层** | `harness-tool init my-app`：模板快照合并进目标目录；配合 `--stack` 可先搭代码脚手架 |
 | 🏗 | **代码脚手架可选** | `--stack react-ts`：先用 create-vite 搭好 app，再合并 harness 层（两者不冲突） |
+| 🧩 | **技能安装** | `skills install <skill> [dir] [--agents claude,cursor]`：把技能复制进各 agent 技能目录（已存在跳过） |
 | 🛡 | **绝不覆盖** | 只新增；已存在文件一律跳过并列出冲突，你的文件永远安全 |
 | 🤖 | **AI 交接** | 装完直接输出一段可复制的提示语，交给编码 agent 照仓库内文档继续落地 |
 | 🩺 | **就绪自检** | `harness-tool doctor`：关键文件 / 占位符 / 机械配置 / active plan / git 五维检查 |
@@ -33,6 +34,7 @@ harness-tool doctor              # 自检（会提示还缺哪些文档/配置�
 它会按仓库内 `AGENTS.md` 与 `docs/BOOTSTRAP.md` 完成落地——你不需要手把手教它。
 
 想叠前端栈？直接用 `--stack`（自动执行 `npm create vite@latest` 后再合并），或手动 `npm create vite@latest . -- --template react-ts` 后再 `harness-tool init`。
+项目里的技能安装：`harness-tool skills install ./skills/code-review my-app`（装到 `.claude/skills` / `.cursor/skills`；canonical 源留在 `skills/`）。
 
 ## 📖 命令参考
 
@@ -40,6 +42,7 @@ harness-tool doctor              # 自检（会提示还缺哪些文档/配置�
 |------|------|--------|
 | `harness-tool init [dir] [--git] [--stack <tpl>]` | ①（`--stack` 时）先用 create-vite 搭脚手架 → ② 把模板快照合并进 `dir`（默认 `.`）：只新增不覆盖、冲突列出；`--git` 额外执行 `git init -b main` | 0=成功，1=错误 |
 | `harness-tool doctor [dir]` | 自检目录是否具备可开工的 harness 工程层 | 0=可开工（无关键缺失），1=存在关键缺失 |
+| `harness-tool skills install <skill> [dir] [--agents <list>]` | 把技能目录（含 SKILL.md）安装进 `dir`（默认 `.`）下各 agent 的技能目录；默认 `claude,cursor`；已存在跳过 | 0=成功，1=错误 |
 
 `doctor` 检查维度：关键文件（critical）· 占位符是否已填 · 五件套 scripts / tsconfig · active plan · git。
 

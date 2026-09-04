@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { initProject, runStackScaffold } from './init.js';
 import { doctorProject } from './doctor.js';
+import { AGENT_SKILL_DIRS, installSkill, type AgentId } from './skills.js';
 
 const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
 
 用法：
   harness-tool init [dir] [--git] [--stack <vite-template>]
+  harness-tool skills install <skill> [dir] [--agents claude,cursor]
   harness-tool doctor [dir]
 
 命令：
@@ -13,6 +15,9 @@ const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
                       把内置模板快照（AGENTS/docs 治理/工程规范/skills 源）合并进 dir
                       （只新增、绝不覆盖；冲突列出；--git 额外执行 git init）
                       --stack：先用 create-vite 搭建代码脚手架再合并（如 react-ts/vue-ts）
+  skills install <skill> [dir] [--agents <list>]
+                      把一个技能目录（含 SKILL.md）复制安装进 dir 下各 agent 的技能目录
+                      （默认 agents=claude,cursor；已存在则跳过不覆盖）
   doctor [dir]        自检一个(harness)项目目录是否就绪：关键文件/占位符/机械配置/active plan/git
 
 参数：
@@ -22,6 +27,7 @@ const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
   harness-tool init my-app
   harness-tool init my-app --stack react-ts
   harness-tool init . --git
+  harness-tool skills install ./skills/code-review my-app --agents claude,cursor
   harness-tool doctor
 `;
 
@@ -44,16 +50,77 @@ function printNextSteps(dir: string, created: number, conflicts: string[]): void
   console.log(`  ${accent('自己动手')}：按 docs/BOOTSTRAP.md 操作。`);
 }
 
+function runSkills(args: string[]): number {
+  const sub = args[0];
+  if (sub !== 'install') {
+    console.error(`未知 skills 子命令：${sub ?? '(空)'}\n`);
+    console.error(USAGE);
+    return 1;
+  }
+  let source = '';
+  let dir = '.';
+  const agents: AgentId[] = [];
+  for (let i = 1; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--agents') {
+      const list = args[i + 1];
+      if (!list) {
+        console.error('--agents 需要一个逗号分隔列表（如 claude,cursor）\n');
+        console.error(USAGE);
+        return 1;
+      }
+      for (const id of list.split(',')) {
+        const k = id.trim() as AgentId;
+        if (!(k in AGENT_SKILL_DIRS)) {
+          console.error(`未知 agent：${id}（支持 ${Object.keys(AGENT_SKILL_DIRS).join(' / ')}）`);
+          return 1;
+        }
+        agents.push(k);
+      }
+      i++;
+    } else if (a.startsWith('-')) {
+      console.error(`未知参数：${a}\n`);
+      console.error(USAGE);
+      return 1;
+    } else if (!source) {
+      source = a;
+    } else {
+      dir = a;
+    }
+  }
+  if (!source) {
+    console.error('skills install 需要 <skill>（含 SKILL.md 的技能目录路径）\n');
+    console.error(USAGE);
+    return 1;
+  }
+  const targets: AgentId[] = agents.length > 0 ? agents : ['claude', 'cursor'];
+  try {
+    const results = installSkill({ source, dir, agents: targets });
+    for (const r of results) {
+      const icon = r.installed ? ok('✔') : warn('↷');
+      console.log(`${icon} ${r.agent}: ${r.skillName} ${r.installed ? '已安装' : '已存在，跳过'} → ${r.target}`);
+    }
+    return 0;
+  } catch (err) {
+    console.error(`harness-tool: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+}
+
 function main(argv: string[]): number {
   const cmd = argv[2];
   if (!cmd || cmd === '-h' || cmd === '--help' || cmd === 'help') {
     console.log(USAGE);
     return 0;
   }
-  if (cmd !== 'init' && cmd !== 'doctor') {
+  if (cmd !== 'init' && cmd !== 'doctor' && cmd !== 'skills') {
     console.error(`未知命令：${cmd}\n`);
     console.error(USAGE);
     return 1;
+  }
+
+  if (cmd === 'skills') {
+    return runSkills(argv.slice(3));
   }
 
   if (cmd === 'doctor') {
