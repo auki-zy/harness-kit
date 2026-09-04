@@ -19,6 +19,7 @@
 - 列出哪些动作必须显式批准。
 - 记录哪些生产或破坏性命令默认不能跑。
 - 调试和验证优先走 sandbox-safe 路径。
+- 按任务类型的权限档位语义见 [`references/permission-profiles-guide.md`](references/permission-profiles-guide.md)（read/plan/edit/approve/full，工具中立）。
 
 ## 依赖与评审规则
 

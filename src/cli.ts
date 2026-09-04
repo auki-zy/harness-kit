@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-import { initProject } from './init.js';
+import { initProject, runStackScaffold } from './init.js';
 import { doctorProject } from './doctor.js';
 
 const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
 
 用法：
-  harness-tool init [dir] [--git]
+  harness-tool init [dir] [--git] [--stack <vite-template>]
   harness-tool doctor [dir]
 
 命令：
-  init [dir] [--git]  把内置模板快照（AGENTS/docs 治理/工程规范/skills 源）合并进 dir
+  init [dir] [--git] [--stack <tpl>]
+                      把内置模板快照（AGENTS/docs 治理/工程规范/skills 源）合并进 dir
                       （只新增、绝不覆盖；冲突列出；--git 额外执行 git init）
+                      --stack：先用 create-vite 搭建代码脚手架再合并（如 react-ts/vue-ts）
   doctor [dir]        自检一个(harness)项目目录是否就绪：关键文件/占位符/机械配置/active plan/git
 
 参数：
@@ -18,6 +20,7 @@ const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
 
 示例：
   harness-tool init my-app
+  harness-tool init my-app --stack react-ts
   harness-tool init . --git
   harness-tool doctor
 `;
@@ -72,9 +75,21 @@ function main(argv: string[]): number {
 
   let dir = '.';
   let git = false;
-  for (const arg of argv.slice(3)) {
+  let stack: string | undefined;
+  const args = argv.slice(3);
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
     if (arg === '--git') {
       git = true;
+    } else if (arg === '--stack') {
+      const tpl = args[i + 1];
+      if (!tpl || tpl.startsWith('-')) {
+        console.error('--stack 需要一个 create-vite 模板名（如 react-ts）\n');
+        console.error(USAGE);
+        return 1;
+      }
+      stack = tpl;
+      i++;
     } else if (arg.startsWith('-')) {
       console.error(`未知参数：${arg}\n`);
       console.error(USAGE);
@@ -85,6 +100,10 @@ function main(argv: string[]): number {
   }
 
   try {
+    if (stack) {
+      runStackScaffold(dir, stack);
+      console.log(`${accent('⚙')} 已用 create-vite 搭建脚手架：${stack}`);
+    }
     const { created, conflicts } = initProject({ dir, git });
     printNextSteps(dir, created.length, conflicts);
     return 0;

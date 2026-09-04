@@ -40,7 +40,9 @@
 - 2026-09-03（v1 骨架落地）：填 `ARCHITECTURE.md` 系统形态/领域地图/CLI 分层；搭代码骨架——package.json（五件套 scripts）、tsconfig strict、eslint(TS)、vitest + `src/{cli.ts,init.ts}`（init：只新增不覆盖+冲突列表+`--git` 可选+提示清单）+ 3 个测试；`template/` 快照 32 文件已同步；**typecheck/lint/build/test 全绿**；行为验证：init 新建 32 文件、重复 init 0 写入 32 冲突不覆盖、未知命令 exit 1。注：vitest 用 threads 池（沙箱禁止 fork worker）。
 - 2026-09-03（v1.1 doctor 落地）：新增 `doctor` 子命令（`src/doctor.ts`：关键文件 critical / 占位符·机械配置·active plan·git 警告），6/6 测试全绿；**本地端到端验证**：消费目录本地安装 harness-tool → `init demo` 写入 32 文件 → `doctor demo` 可开工(exit 0) → `doctor empty` ❌1 关键(exit 1)；确认零运行时依赖（消费端仅装 1 包）。注：沙箱内无法全局 `npm link`（写全局目录被拒），用本地目录安装等价验证；真实 `npx harness-tool` 需发布后体验。
 - 2026-09-04：**定版发布名 `harness-tool`**（harness-kit 因与 `harnesskit` 近似被 npm 拒绝；harness-toolkit 被他人占用）→ 目录/GitHub/包名全统一改名并强推（历史整理为 3 笔：5a2c47f → 094eb95 → 00a8ffe）；npm 认证打通（auki-zy granular token，bypass 2FA）；**已发布 0.1.0 占位并上线**。
-- 下一步：用 harness-tool 开第一个真实目标项目并回填卡点 → v1.1 余项（--stack、权限档位示例、skills 安装范式按 agent-install 模式）。
+- 2026-09-04（自动同步流水线）：`scripts/sync-template.mjs` + `.github/workflows/template-sync-release.yml`（每日+手动：对比上游 → 同步 → bump → 门禁 → 发 npm → tag）；手动触发验证通过（无更新分支）。快照同步至 harness-template@f64ddd1。
+- 2026-09-04（v1.1 余项推进）：权限档位参考文档入 harness-template（`docs/references/permission-profiles-guide.md`，接线 SECURITY）；`--stack <tpl>` 落地（init 前先用 create-vite 搭脚手架，如 `react-ts`）；README/usage 同步。
+- 下一步：用 harness-tool 开第一个真实目标项目回填卡点 → 发布 0.1.x（含 --stack 与最新快照）→ skills 安装范式（agent-install 模式）。
 
 ## 开放决策
 

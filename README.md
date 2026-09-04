@@ -10,7 +10,8 @@
 
 | | 特性 | 说明 |
 |---|---|---|
-| ⚡ | **一条命令铺层** | `harness-tool init my-app`：模板快照（32 个文件）合并进目标目录 |
+| ⚡ | **一条命令铺层** | `harness-tool init my-app`：模板快照合并进目标目录；配合 `--stack` 可先搭代码脚手架 |
+| 🏗 | **代码脚手架可选** | `--stack react-ts`：先用 create-vite 搭好 app，再合并 harness 层（两者不冲突） |
 | 🛡 | **绝不覆盖** | 只新增；已存在文件一律跳过并列出冲突，你的文件永远安全 |
 | 🤖 | **AI 交接** | 装完直接输出一段可复制的提示语，交给编码 agent 照仓库内文档继续落地 |
 | 🩺 | **就绪自检** | `harness-tool doctor`：关键文件 / 占位符 / 机械配置 / active plan / git 五维检查 |
@@ -20,21 +21,24 @@
 ## 🚀 快速开始
 
 ```bash
-npx harness-tool init my-app     # ① 初始化（也可 init . --git 顺带 git init）
+# 纯 harness 层
+npx harness-tool init my-app
+# 直接带前端脚手架（先 create-vite 再合并 harness 层）
+npx harness-tool init my-app --stack react-ts
 cd my-app
-harness-tool doctor              # ② 自检（会提示还缺哪些文档/配置）
+harness-tool doctor              # 自检（会提示还缺哪些文档/配置）
 ```
 
 然后把 `init` 输出里那段话发给你的编码 agent（DSH / Claude Code / Cursor / Codex），
 它会按仓库内 `AGENTS.md` 与 `docs/BOOTSTRAP.md` 完成落地——你不需要手把手教它。
 
-想叠前端栈？先初始化，再在项目里执行 `npm create vite@latest . -- --template react-ts`。
+想叠前端栈？直接用 `--stack`（自动执行 `npm create vite@latest` 后再合并），或手动 `npm create vite@latest . -- --template react-ts` 后再 `harness-tool init`。
 
 ## 📖 命令参考
 
 | 命令 | 作用 | 退出码 |
 |------|------|--------|
-| `harness-tool init [dir] [--git]` | 把模板快照合并进 `dir`（默认 `.`）；只新增不覆盖，冲突列出；`--git` 额外执行 `git init -b main` | 0=成功，1=错误 |
+| `harness-tool init [dir] [--git] [--stack <tpl>]` | ①（`--stack` 时）先用 create-vite 搭脚手架 → ② 把模板快照合并进 `dir`（默认 `.`）：只新增不覆盖、冲突列出；`--git` 额外执行 `git init -b main` | 0=成功，1=错误 |
 | `harness-tool doctor [dir]` | 自检目录是否具备可开工的 harness 工程层 | 0=可开工（无关键缺失），1=存在关键缺失 |
 
 `doctor` 检查维度：关键文件（critical）· 占位符是否已填 · 五件套 scripts / tsconfig · active plan · git。

@@ -76,3 +76,22 @@ export function runGitInit(dir: string): void {
     throw new Error(`git init 失败：${(res.stderr ?? res.stdout ?? '').trim()}`);
   }
 }
+
+/**
+ * 用 create-vite 在目标目录搭建代码脚手架（--stack）。
+ * 先于模板合并执行：脚手架产物（package.json/src/…）不受影响，harness 层只做增量合并。
+ */
+export function runStackScaffold(dir: string, stack: string): void {
+  const target = path.resolve(dir);
+  mkdirSync(target, { recursive: true });
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const res = spawnSync(npmCmd, ['create', 'vite@latest', '.', '--', '--template', stack], {
+    cwd: target,
+    stdio: 'inherit',
+  });
+  if (res.status !== 0) {
+    throw new Error(
+      `脚手架创建失败（npm create vite --template ${stack}，exit ${res.status ?? 'unknown'}）；可去掉 --stack 手动执行。`,
+    );
+  }
+}
