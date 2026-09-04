@@ -15,15 +15,20 @@ const FORCE = process.argv.includes('--force');
 
 function latestSha() {
   return new Promise((resolve, reject) => {
+    const token = process.env.GITHUB_TOKEN || process.env.HK_TOKEN || '';
+    const headers = { 'User-Agent': 'harness-tool-sync', Accept: 'application/vnd.github+json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
     https
-      .get({ hostname: 'api.github.com', path: `/repos/${REPO}/commits/${BRANCH}`, headers: { 'User-Agent': 'harness-tool-sync' } }, (res) => {
+      .get({ hostname: 'api.github.com', path: `/repos/${REPO}/commits/${BRANCH}`, headers }, (res) => {
         let b = '';
         res.on('data', (c) => (b += c));
         res.on('end', () => {
           try {
-            resolve(JSON.parse(b).sha);
+            const j = JSON.parse(b);
+            if (!j.sha) throw new Error(`body: ${b.slice(0, 200)}`);
+            resolve(j.sha);
           } catch {
-            reject(new Error(`无法解析上游 commit：HTTP ${res.statusCode}`));
+            reject(new Error(`无法解析上游 commit（HTTP ${res.statusCode}）：${b.slice(0, 200)}`));
           }
         });
       })
