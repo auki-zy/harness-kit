@@ -5,7 +5,7 @@ import path from 'node:path';
 import { initProject } from './init.js';
 
 function makeTmp(): string {
-  return mkdtempSync(path.join(tmpdir(), 'harness-kit-'));
+  return mkdtempSync(path.join(tmpdir(), 'harness-tool-'));
 }
 
 describe('initProject', () => {

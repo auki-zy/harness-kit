@@ -15,18 +15,18 @@
 ## 可借鉴能力
 
 1. **权限档位分层**（来自 npm `harness-init` 的 profiles）：`default / plan / acceptEdits / bypassPermissions`——把"审批强度按任务类型切档"做成可切换档位。模式通用，可映射到本项目的 `SECURITY.md`/权限策略示例（不绑定 Claude）。
-2. **`doctor` 自检命令**（同包）：装完 harness 后自检——必填文档是否填、五件套 scripts 是否齐、验证是否跑过。→ **已实现（2026-09-03）**：`harness-kit doctor [dir]`（关键文件 critical / 占位符·机械配置·active plan·git 警告）。
+2. **`doctor` 自检命令**（同包）：装完 harness 后自检——必填文档是否填、五件套 scripts 是否齐、验证是否跑过。→ **已实现（2026-09-03）**：`harness-tool doctor [dir]`（关键文件 critical / 占位符·机械配置·active plan·git 警告）。
 3. **目标/状态持久化 + "别把复杂工作塞进一次上下文窗口"**（来自 `harness-cli`）：与模板 `MEMORY.md`/exec-plans 理念同源；其 goal→task→文件系统存储可作为本项目将来与"长期任务编排"融合的参考（v2+ 方向）。
 
 ## 定位差异（README 与对外文案据此写）
 
 - **本项目**：工程化治理模板的**分发器**——把 AGENTS/docs 治理、工程规范（FSD/测试/CI/Review）、技能源目录、BOOTSTRAP 流程带进新项目；工具中立、面向"agent-first 工程化仓库"。
 - **不做**：不绑定单一工具（非 Claude-only）、不做任务编排 runtime、不代填产品内容。
-- **不撞**：npm 裸名 `harness-init` 已占用 → 发布名定 **`harness-kit`**（通用、不带用户名；见下命名备忘）。
+- **不撞**：npm 裸名 `harness-init` 已占用 → 发布名定 **`harness-tool`**（通用、不带用户名；见下命名备忘）。
 
 ## 命名备忘
 
-- 占用：`harness-init`、`harness`、`create-harness`、`harness-cli`、`create-harness-app`、`harness-starter`、`harnesskit`、`harness-create`（均不可用）
-- 决策（2026-09-03）：通用发布名定 **`harness-kit`**（npx 用法 `npx harness-kit init my-app`）；不带用户名。
-  - 备选：`create-harness-project`（npm create 生态）、`init-harness`（命令即动词）
-  - 提醒：FREE 名有被抢注风险，选中后尽早发 0.x 占位。
+- 占用/不可用：`harness`、`harness-init`、`harness-cli`、`create-harness`、`create-harness-app`、`harness-starter`、`harness-create`、`harnesskit`、`harness-toolkit`(0.1.6)；`harness-kit` 因与已存在 `harnesskit` 归一化近似（忽略 `-` 后相等）被 npm 策略拒绝，非他人占用。
+- 定版（2026-09-04）：发布名 **`harness-tool`**——实测 FREE、邻近名（harness-tools/harnesstool 等）全空、不会触发近似拦截；命令 `npx harness-tool init my-app`；目录/GitHub/npm 全统一为此名。
+- 历史链：harness-init → harness-kit（npm 近似拒绝）→ **harness-tool**（最终）。
+- 提醒：FREE 名仍有抢注风险——本包已发 0.x 占位。

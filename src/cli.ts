@@ -2,11 +2,11 @@
 import { initProject } from './init.js';
 import { doctorProject } from './doctor.js';
 
-const USAGE = `harness-kit — 给新项目一键带上 harness 工程层
+const USAGE = `harness-tool — 给新项目一键带上 harness 工程层
 
 用法：
-  harness-kit init [dir] [--git]
-  harness-kit doctor [dir]
+  harness-tool init [dir] [--git]
+  harness-tool doctor [dir]
 
 命令：
   init [dir] [--git]  把内置模板快照（AGENTS/docs 治理/工程规范/skills 源）合并进 dir
@@ -17,9 +17,9 @@ const USAGE = `harness-kit — 给新项目一键带上 harness 工程层
   dir   目标目录（默认 "."；init 时目录可不存在，会自动创建）
 
 示例：
-  harness-kit init my-app
-  harness-kit init . --git
-  harness-kit doctor
+  harness-tool init my-app
+  harness-tool init . --git
+  harness-tool doctor
 `;
 
 const paint = (code: number, s: string): string => (process.stdout.isTTY ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -37,7 +37,7 @@ function printNextSteps(dir: string, created: number, conflicts: string[]): void
   }
   console.log('');
   console.log(`  ${accent('交给 AI')}：复制这句给你的 agent：`);
-  console.log(`    ${subtle('“请按 AGENTS.md + BOOTSTRAP.md 落地，最后跑 harness-kit doctor 确认。”')}`);
+  console.log(`    ${subtle('“请按 AGENTS.md + BOOTSTRAP.md 落地，最后跑 harness-tool doctor 确认。”')}`);
   console.log(`  ${accent('自己动手')}：按 docs/BOOTSTRAP.md 操作。`);
 }
 
@@ -89,7 +89,7 @@ function main(argv: string[]): number {
     printNextSteps(dir, created.length, conflicts);
     return 0;
   } catch (err) {
-    console.error(`harness-kit: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`harness-tool: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
   }
 }

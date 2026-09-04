@@ -2,12 +2,12 @@
 
 这份文件是系统的顶层地图。它应该保持简短，只提供最关键的结构信息，并把更深的内容指向其他文档。
 
-> 已按 BOOTSTRAP 第 2 步填写（2026-09-03）。产品 = harness-kit CLI；本项目同时是 harness-template 的 dogfood。
+> 已按 BOOTSTRAP 第 2 步填写（2026-09-03）。产品 = harness-tool CLI；本项目同时是 harness-template 的 dogfood。
 
 ## 系统形态
 
-- 产品：harness-kit（CLI：给新项目一键带上 harness 工程层）
-- 主用户流程：`npx harness-kit init [dir]` → 模板快照合并（只新增不覆盖）→ 可选 git 初始化 → 打印 BOOTSTRAP 待办
+- 产品：harness-tool（CLI：给新项目一键带上 harness 工程层）
+- 主用户流程：`npx harness-tool init [dir]` → 模板快照合并（只新增不覆盖）→ 可选 git 初始化 → 打印 BOOTSTRAP 待办
 - 运行面：cli
 - 产品行为真相来源：`docs/product-specs/`（暂无独立 spec，先以本文件 + active plan 为准）
 

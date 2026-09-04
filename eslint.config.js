@@ -1,4 +1,4 @@
-// ESLint flat config（TypeScript，harness-kit v1）
+// ESLint flat config（TypeScript，harness-tool v1）
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 

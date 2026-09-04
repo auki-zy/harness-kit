@@ -78,7 +78,7 @@ export function doctorProject(dir: string): DoctorResult {
   add('active plan', hasPlan, false, hasPlan ? '存在执行计划' : 'docs/exec-plans/active/ 无计划（按 BOOTSTRAP 第 4 步建立）');
 
   // 5) git（信息）
-  add('git 仓库', exists(path.join(root, '.git')), false, exists(path.join(root, '.git')) ? '已初始化' : '未初始化（可用 harness-kit init --git）');
+  add('git 仓库', exists(path.join(root, '.git')), false, exists(path.join(root, '.git')) ? '已初始化' : '未初始化（可用 harness-tool init --git）');
 
   return {
     checks,
