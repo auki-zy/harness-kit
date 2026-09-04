@@ -48,7 +48,12 @@ if (sha === current && !FORCE) {
 
 const tmp = mkdtempSync(path.join(tmpdir(), 'hk-tpl-'));
 try {
-  const r = spawnSync('git', ['-c', 'http.sslBackend=openssl', 'clone', '--depth=1', '--branch', BRANCH, `https://github.com/${REPO}.git`, tmp], { stdio: 'inherit' });
+  // Windows 沙箱需要显式 openssl 后端；Linux/macOS 只有系统自带后端，不能传该参数
+  const cloneArgs =
+    process.platform === 'win32'
+      ? ['-c', 'http.sslBackend=openssl', 'clone', '--depth=1', '--branch', BRANCH, `https://github.com/${REPO}.git`, tmp]
+      : ['clone', '--depth=1', '--branch', BRANCH, `https://github.com/${REPO}.git`, tmp];
+  const r = spawnSync('git', cloneArgs, { stdio: 'inherit' });
   if (r.status !== 0) throw new Error('git clone 上游失败');
   rmSync(path.join(tmp, '.git'), { recursive: true, force: true });
   rmSync(TEMPLATE_DIR, { recursive: true, force: true });
