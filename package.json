@@ -1,0 +1,45 @@
+{
+  "name": "harness-kit",
+  "version": "0.1.0",
+  "description": "CLI：给新项目一键带上 harness 工程层（AGENTS/docs 治理/工程规范/skills 源目录）",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "harness-kit": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "template"
+  ],
+  "keywords": [
+    "harness",
+    "agents",
+    "agent-first",
+    "scaffold",
+    "cli",
+    "coding-agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/auki-zy/harness-kit.git"
+  },
+  "scripts": {
+    "dev": "node --watch dist/cli.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run --pool=threads src",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.4.1",
+    "eslint": "^10.9.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.69.0",
+    "vitest": "^5.0.0"
+  }
+}

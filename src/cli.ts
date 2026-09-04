@@ -1,0 +1,97 @@
+#!/usr/bin/env node
+import { initProject } from './init.js';
+import { doctorProject } from './doctor.js';
+
+const USAGE = `harness-kit — 给新项目一键带上 harness 工程层
+
+用法：
+  harness-kit init [dir] [--git]
+  harness-kit doctor [dir]
+
+命令：
+  init [dir] [--git]  把内置模板快照（AGENTS/docs 治理/工程规范/skills 源）合并进 dir
+                      （只新增、绝不覆盖；冲突列出；--git 额外执行 git init）
+  doctor [dir]        自检一个(harness)项目目录是否就绪：关键文件/占位符/机械配置/active plan/git
+
+参数：
+  dir   目标目录（默认 "."；init 时目录可不存在，会自动创建）
+
+示例：
+  harness-kit init my-app
+  harness-kit init . --git
+  harness-kit doctor
+`;
+
+const paint = (code: number, s: string): string => (process.stdout.isTTY ? `\x1b[${code}m${s}\x1b[0m` : s);
+const ok = (s: string): string => paint(32, s); // green
+const warn = (s: string): string => paint(33, s); // yellow
+const accent = (s: string): string => paint(36, s); // cyan
+const subtle = (s: string): string => paint(2, s); // dim
+
+function printNextSteps(dir: string, created: number, conflicts: string[]): void {
+  const where = dir === '.' ? '当前目录' : dir;
+  console.log(`${ok('✔')} 已在 ${where} 写入 ${created} 个 harness 工程文件`);
+  if (conflicts.length > 0) {
+    const shown = conflicts.slice(0, 5).join('、');
+    console.log(`${warn('⚠')} 跳过 ${conflicts.length} 个已存在文件：${shown}${conflicts.length > 5 ? ` 等 ${conflicts.length} 个` : ''}`);
+  }
+  console.log('');
+  console.log(`  ${accent('交给 AI')}：复制这句给你的 agent：`);
+  console.log(`    ${subtle('“请按 AGENTS.md + BOOTSTRAP.md 落地，最后跑 harness-kit doctor 确认。”')}`);
+  console.log(`  ${accent('自己动手')}：按 docs/BOOTSTRAP.md 操作。`);
+}
+
+function main(argv: string[]): number {
+  const cmd = argv[2];
+  if (!cmd || cmd === '-h' || cmd === '--help' || cmd === 'help') {
+    console.log(USAGE);
+    return 0;
+  }
+  if (cmd !== 'init' && cmd !== 'doctor') {
+    console.error(`未知命令：${cmd}\n`);
+    console.error(USAGE);
+    return 1;
+  }
+
+  if (cmd === 'doctor') {
+    const dir = argv[3] ?? '.';
+    if (argv[4]) {
+      console.error(`未知参数：${argv[4]}\n`);
+      console.error(USAGE);
+      return 1;
+    }
+    const res = doctorProject(dir);
+    for (const c of res.checks) {
+      const icon = c.ok ? '✓' : c.critical ? '✗' : '!';
+      console.log(`${icon} ${c.name} — ${c.detail}`);
+    }
+    const warns = res.checks.filter((c) => !c.critical && !c.ok).length;
+    console.log(`\n${res.criticalFails === 0 ? '✅ 可开工' : `❌ ${res.criticalFails} 项关键缺失`}（警告 ${warns} 项）`);
+    return res.criticalFails === 0 ? 0 : 1;
+  }
+
+  let dir = '.';
+  let git = false;
+  for (const arg of argv.slice(3)) {
+    if (arg === '--git') {
+      git = true;
+    } else if (arg.startsWith('-')) {
+      console.error(`未知参数：${arg}\n`);
+      console.error(USAGE);
+      return 1;
+    } else {
+      dir = arg;
+    }
+  }
+
+  try {
+    const { created, conflicts } = initProject({ dir, git });
+    printNextSteps(dir, created.length, conflicts);
+    return 0;
+  } catch (err) {
+    console.error(`harness-kit: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+}
+
+process.exitCode = main(process.argv);
